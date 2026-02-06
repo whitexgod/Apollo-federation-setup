@@ -25,13 +25,18 @@ export class HealthService {
       {
         name: 'users-service',
         url: this.configService.get('USERS_SERVICE_URL') || 'http://users-service:3001/graphql',
-        healthUrl: this.configService.get('USERS_SERVICE_URL')?.replace('/graphql', '') || 'http://users-service:3001',
+        healthUrl:
+          this.configService.get('USERS_SERVICE_URL')?.replace('/graphql', '') ||
+          'http://users-service:3001',
         type: 'graphql',
       },
       {
         name: 'products-service',
-        url: this.configService.get('PRODUCTS_SERVICE_URL') || 'http://products-service:3002/graphql',
-        healthUrl: this.configService.get('PRODUCTS_SERVICE_URL')?.replace('/graphql', '') || 'http://products-service:3002',
+        url:
+          this.configService.get('PRODUCTS_SERVICE_URL') || 'http://products-service:3002/graphql',
+        healthUrl:
+          this.configService.get('PRODUCTS_SERVICE_URL')?.replace('/graphql', '') ||
+          'http://products-service:3002',
         type: 'graphql',
       },
       {
@@ -42,10 +47,10 @@ export class HealthService {
       },
     ];
 
-    const healthChecks = services.map((service) => 
-      service.type === 'graphql' 
+    const healthChecks = services.map((service) =>
+      service.type === 'graphql'
         ? this.checkGraphQLService(service.name, service.url, service.healthUrl)
-        : this.checkRestService(service.name, service.healthUrl)
+        : this.checkRestService(service.name, service.healthUrl),
     );
 
     return Promise.all(healthChecks);
@@ -54,7 +59,11 @@ export class HealthService {
   /**
    * Check GraphQL service health using dedicated health endpoint
    */
-  private async checkGraphQLService(name: string, graphqlUrl: string, healthUrl: string): Promise<ServiceHealth> {
+  private async checkGraphQLService(
+    name: string,
+    graphqlUrl: string,
+    healthUrl: string,
+  ): Promise<ServiceHealth> {
     const startTime = Date.now();
 
     try {

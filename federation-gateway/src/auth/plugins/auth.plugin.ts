@@ -7,30 +7,27 @@ export class AuthPlugin implements ApolloServerPlugin {
 
   async requestDidStart(): Promise<GraphQLRequestListener<any>> {
     const authService = this.authService; // Capture authService in closure
-    
+
     return {
       async didResolveOperation({ request, contextValue }) {
         // Check if this is an introspection query - allow without authentication
         const query = request.query || '';
         const operationName = request.operationName;
-        
-        const isIntrospectionQuery = 
+
+        const isIntrospectionQuery =
           operationName === 'IntrospectionQuery' ||
           query.includes('IntrospectionQuery') ||
           query.includes('__schema') ||
           query.includes('__type');
-        
+
         if (isIntrospectionQuery) {
           return; // Allow introspection queries for GraphQL Playground
         }
 
         // Check if this is a public mutation (login or register)
-        const isPublicMutation = 
-          query.includes('mutation') && (
-            query.includes('login') ||
-            query.includes('register')
-          );
-        
+        const isPublicMutation =
+          query.includes('mutation') && (query.includes('login') || query.includes('register'));
+
         if (isPublicMutation) {
           return; // Allow login and register mutations without authentication
         }

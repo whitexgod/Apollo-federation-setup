@@ -12,9 +12,7 @@ import { HealthModule } from './health/health.module';
       autoSchemaFile: {
         federation: 2,
       },
-      plugins: [
-        ApolloServerPluginLandingPageLocalDefault(),
-      ],
+      plugins: [ApolloServerPluginLandingPageLocalDefault()],
       playground: false, // Disable old playground in favor of Apollo Sandbox
       introspection: true, // Enable introspection for GraphQL Playground/Sandbox
       context: ({ req }) => ({ req }),

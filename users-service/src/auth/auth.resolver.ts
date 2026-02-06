@@ -15,12 +15,7 @@ export class AuthResolver {
 
   @Mutation(() => AuthResponse)
   async register(@Args('input') input: RegisterInput): Promise<AuthResponse> {
-    return this.authService.register(
-      input.name,
-      input.email,
-      input.password,
-      input.role,
-    );
+    return this.authService.register(input.name, input.email, input.password, input.role);
   }
 
   @ResolveField(() => String, { nullable: true })

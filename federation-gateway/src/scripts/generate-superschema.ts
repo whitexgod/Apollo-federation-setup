@@ -11,7 +11,8 @@ async function generateSuperschema() {
   console.log('🔄 Generating superschema from subgraphs...\n');
 
   const authServiceUrl = process.env.AUTH_SERVICE_URL || 'http://localhost:3000/graphql';
-  const notificationServiceUrl = process.env.NOTIFICATION_SERVICE_URL || 'http://localhost:3002/graphql';
+  const notificationServiceUrl =
+    process.env.NOTIFICATION_SERVICE_URL || 'http://localhost:3002/graphql';
 
   try {
     // Create gateway instance
@@ -38,11 +39,11 @@ async function generateSuperschema() {
     console.log('✅ Superschema generated successfully!');
     console.log(`📄 File location: ${outputPath}`);
     console.log(`📊 Schema size: ${superschema.length} characters\n`);
-    
+
     // Print summary
     const typeCount = (superschema.match(/^type /gm) || []).length;
     const queryCount = (superschema.match(/^\s+\w+.*:/gm) || []).length;
-    
+
     console.log('📈 Schema Summary:');
     console.log(`   - Types defined: ${typeCount}`);
     console.log(`   - Total fields: ${queryCount}`);

@@ -17,7 +17,8 @@ export class ConfigService {
       JWT_SECRET: process.env.JWT_SECRET || 'your-super-secret-jwt-key',
       JWT_EXPIRES_IN: process.env.JWT_EXPIRES_IN || '1h',
       AUTH_SERVICE_URL: process.env.AUTH_SERVICE_URL || 'http://localhost:3000/graphql',
-      NOTIFICATION_SERVICE_URL: process.env.NOTIFICATION_SERVICE_URL || 'http://localhost:3002/graphql',
+      NOTIFICATION_SERVICE_URL:
+        process.env.NOTIFICATION_SERVICE_URL || 'http://localhost:3002/graphql',
       AUTH_REST_SERVICE_URL: process.env.AUTH_REST_SERVICE_URL || 'http://localhost:3000',
       MEDIA_SERVICE_URL: process.env.MEDIA_SERVICE_URL || 'http://localhost:3001',
       CORS_ORIGIN: process.env.CORS_ORIGIN || 'http://localhost:5173',

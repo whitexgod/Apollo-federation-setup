@@ -19,7 +19,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     // Load RSA public key from keys directory
     const keysPath = path.join(process.cwd(), 'keys');
     let publicKey: string;
-    
+
     try {
       publicKey = fs.readFileSync(path.join(keysPath, 'jwtRS256.key.pub'), 'utf8');
     } catch (error) {

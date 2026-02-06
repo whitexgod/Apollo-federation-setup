@@ -125,12 +125,7 @@ export class ProxyService {
   /**
    * Generic forward request method
    */
-  async forwardRequest(
-    req: any,
-    res: any,
-    targetUrl: string,
-    serviceName: string,
-  ): Promise<void> {
+  async forwardRequest(req: any, res: any, targetUrl: string, serviceName: string): Promise<void> {
     const config: AxiosRequestConfig = {
       method: req.method,
       url: targetUrl + (req.url.includes('?') ? '?' + req.url.split('?')[1] : ''),
@@ -142,12 +137,12 @@ export class ProxyService {
 
     try {
       const response = await firstValueFrom(this.httpService.request(config));
-      
+
       // Forward response headers
       Object.keys(response.headers).forEach((key) => {
         res.setHeader(key, response.headers[key]);
       });
-      
+
       // Forward status and body
       res.status(response.status).send(response.data);
     } catch (error) {
@@ -165,7 +160,7 @@ export class ProxyService {
    */
   private sanitizeHeaders(headers: any): any {
     const sanitized = { ...headers };
-    
+
     // Remove hop-by-hop headers
     delete sanitized['host'];
     delete sanitized['connection'];
@@ -176,7 +171,7 @@ export class ProxyService {
     delete sanitized['proxy-authorization'];
     delete sanitized['proxy-authenticate'];
     delete sanitized['upgrade'];
-    
+
     // Ensure user context headers are preserved and forwarded
     // These headers are added by JwtAuthGuard after token verification
     // - x-user-id
@@ -184,7 +179,7 @@ export class ProxyService {
     // - x-user-roles
     // - x-user-privileges (if available)
     // - x-workspace-id (if available)
-    
+
     return sanitized;
   }
 }

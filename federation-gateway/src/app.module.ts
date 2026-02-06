@@ -31,7 +31,9 @@ import { AuthPlugin } from './auth/plugins/auth.plugin';
               },
               {
                 name: 'products',
-                url: configService.get('PRODUCTS_SERVICE_URL') || 'http://products-service:3002/graphql',
+                url:
+                  configService.get('PRODUCTS_SERVICE_URL') ||
+                  'http://products-service:3002/graphql',
               },
             ],
           }),
@@ -41,10 +43,7 @@ import { AuthPlugin } from './auth/plugins/auth.plugin';
               willSendRequest({ request, context }) {
                 // Forward authorization header to subgraphs
                 if (context.req?.headers?.authorization) {
-                  request.http.headers.set(
-                    'authorization',
-                    context.req.headers.authorization,
-                  );
+                  request.http.headers.set('authorization', context.req.headers.authorization);
                 }
               },
             });
@@ -52,10 +51,7 @@ import { AuthPlugin } from './auth/plugins/auth.plugin';
         },
         server: {
           context: ({ req }) => ({ req }),
-          plugins: [
-            new AuthPlugin(authService),
-            ApolloServerPluginLandingPageLocalDefault(),
-          ],
+          plugins: [new AuthPlugin(authService), ApolloServerPluginLandingPageLocalDefault()],
           playground: false, // Disable old playground in favor of Apollo Sandbox
           introspection: true, // Enable introspection for GraphQL Playground/Sandbox
         },

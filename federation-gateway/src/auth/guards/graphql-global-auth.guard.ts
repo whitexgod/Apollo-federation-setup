@@ -1,5 +1,4 @@
 import { Injectable, ExecutionContext, CanActivate } from '@nestjs/common';
-import { GqlExecutionContext } from '@nestjs/graphql';
 import { Reflector } from '@nestjs/core';
 import { GraphqlJwtAuthGuard } from './graphql-jwt-auth.guard';
 
@@ -21,7 +20,7 @@ export class GraphqlGlobalAuthGuard extends GraphqlJwtAuthGuard implements CanAc
   canActivate(context: ExecutionContext): boolean | Promise<boolean> {
     // Check if it's a GraphQL request by checking the context type
     const contextType = context.getType() as string;
-    
+
     // If it's not a GraphQL request, let REST guards handle it
     if (contextType !== 'graphql') {
       // REST endpoints will be protected by JwtAuthGuard on their controllers

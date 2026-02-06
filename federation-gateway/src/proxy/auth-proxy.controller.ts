@@ -3,14 +3,12 @@ import {
   All,
   Req,
   Res,
-  UseGuards,
   HttpStatus,
   UseInterceptors,
   UploadedFile,
 } from '@nestjs/common';
 import { Request, Response } from 'express';
 import { ProxyService } from './proxy.service';
-import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { Public } from '../auth/decorators/public.decorator';
 

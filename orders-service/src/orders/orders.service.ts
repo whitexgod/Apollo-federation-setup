@@ -22,9 +22,7 @@ export class OrdersService {
     {
       id: '2',
       userId: '2',
-      items: [
-        { productId: '2', quantity: 1, price: 899.99 },
-      ],
+      items: [{ productId: '2', quantity: 1, price: 899.99 }],
       totalAmount: 899.99,
       status: OrderStatus.SHIPPED,
       shippingAddress: '456 Oak Ave, Los Angeles, CA 90001',
@@ -34,9 +32,7 @@ export class OrdersService {
     {
       id: '3',
       userId: '1',
-      items: [
-        { productId: '3', quantity: 1, price: 299.99 },
-      ],
+      items: [{ productId: '3', quantity: 1, price: 299.99 }],
       totalAmount: 299.99,
       status: OrderStatus.PROCESSING,
       shippingAddress: '123 Main St, New York, NY 10001',
@@ -84,15 +80,15 @@ export class OrdersService {
 
   update(id: string, updateOrderDto: UpdateOrderDto): Order {
     const order = this.findById(id);
-    
+
     if (updateOrderDto.status) {
       order.status = updateOrderDto.status;
     }
-    
+
     if (updateOrderDto.shippingAddress) {
       order.shippingAddress = updateOrderDto.shippingAddress;
     }
-    
+
     order.updatedAt = new Date();
     return order;
   }

@@ -1,6 +1,5 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import * as jwt from 'jsonwebtoken';
-import * as bcrypt from 'bcrypt';
 import * as fs from 'fs';
 import * as path from 'path';
 import { UsersService } from '../users/users.service';
@@ -38,7 +37,7 @@ export class AuthService {
   async login(email: string, password: string): Promise<LoginResponse> {
     // Find user by email
     const user = this.usersService.findByEmail(email);
-    
+
     if (!user) {
       throw new UnauthorizedException('Invalid credentials');
     }
@@ -46,7 +45,7 @@ export class AuthService {
     // For demo purposes, we're using a simple password check
     // In production, use bcrypt.compare with hashed passwords
     const isPasswordValid = await this.validatePassword(password, user);
-    
+
     if (!isPasswordValid) {
       throw new UnauthorizedException('Invalid credentials');
     }
@@ -69,7 +68,12 @@ export class AuthService {
     return password === user.password;
   }
 
-  async register(name: string, email: string, password: string, role?: string): Promise<LoginResponse> {
+  async register(
+    name: string,
+    email: string,
+    password: string,
+    role?: string,
+  ): Promise<LoginResponse> {
     // Check if user already exists
     const existingUser = this.usersService.findByEmail(email);
     if (existingUser) {
@@ -116,5 +120,4 @@ export class AuthService {
   getPublicKey(): string {
     return this.publicKey;
   }
-
 }

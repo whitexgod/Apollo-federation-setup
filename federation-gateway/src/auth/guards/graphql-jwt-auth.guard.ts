@@ -9,7 +9,7 @@ export class GraphqlJwtAuthGuard extends AuthGuard('jwt') {
     return ctx.getContext().req;
   }
 
-  handleRequest(err: any, user: any, info: any) {
+  handleRequest(err: any, user: any, _info: any) {
     // Throw error if authentication fails
     if (err || !user) {
       throw new UnauthorizedException('Authentication required');

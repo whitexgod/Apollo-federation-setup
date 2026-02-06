@@ -24,7 +24,7 @@ export class AuthService {
   constructor(private readonly configService: ConfigService) {
     // Try to load public key from keys directory first
     const publicKeyPath = path.join(process.cwd(), 'keys', 'jwtRS256.key.pub');
-    
+
     if (fs.existsSync(publicKeyPath)) {
       try {
         this.publicKey = fs.readFileSync(publicKeyPath, 'utf8');
@@ -59,7 +59,7 @@ export class AuthService {
           algorithms: ['HS256'],
         });
       }
-      
+
       return {
         userId: decoded.userId || decoded.sub,
         email: decoded.email,
@@ -84,7 +84,7 @@ export class AuthService {
   private jwkToPem(jwk: any): string {
     // For RSA keys, we need to construct PEM from modulus (n) and exponent (e)
     const NodeRSA = require('node-rsa');
-    
+
     try {
       const key = new NodeRSA();
       key.importKey(

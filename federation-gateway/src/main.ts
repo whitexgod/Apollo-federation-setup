@@ -45,7 +45,7 @@ async function bootstrap() {
 
   const port = process.env.PORT || 4000;
   await app.listen(port);
-  
+
   console.log('');
   console.log('🚀 Federation Gateway (Supergraph) is running!');
   console.log('═══════════════════════════════════════════════════════');
@@ -59,7 +59,9 @@ async function bootstrap() {
   console.log('🔒 REST API Proxies:');
   console.log(`   - Auth:            http://localhost:${port}/api/auth/*`);
   console.log(`   - Media:           http://localhost:${port}/api/media/*`);
-  console.log(`   - Orders:          http://localhost:${port}/api/orders/* (proxy to orders-service)`);
+  console.log(
+    `   - Orders:          http://localhost:${port}/api/orders/* (proxy to orders-service)`,
+  );
   console.log('═══════════════════════════════════════════════════════');
   console.log(`🔄 Live reload: Active - Changes will auto-reload`);
   console.log('');
