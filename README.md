@@ -1,392 +1,330 @@
-# Microservices Architecture with Apollo Federation
+# 🚀 Full-Stack GraphQL Federation Microservices Application
 
-This project demonstrates a microservices architecture using **Apollo Federation** for GraphQL services and REST API integration.
+A modern, production-ready full-stack application built with **React**, **TypeScript**, **NestJS**, and **Apollo GraphQL Federation**. Features comprehensive authentication, user management, and automatic token refresh for seamless user experience.
 
-## Architecture Overview
+## ✨ Key Features
+
+### 🔐 **Advanced Authentication System**
+- **JWT-based authentication** with RS256 algorithm
+- **Refresh token implementation** for persistent sessions
+- **Automatic token refresh** - users never get logged out unexpectedly
+- **Remember Me feature** - stay logged in for 7 or 30 days
+- **Protected routes** with seamless redirect handling
+- **Access tokens**: 15 minutes (security)
+- **Refresh tokens**: 7 days (default) or 30 days (with Remember Me)
+
+### 🎨 **Modern React Frontend**
+- **React 19** with **TypeScript**
+- **Apollo Client 3** with intelligent error handling
+- **GraphQL Code Generator** for type-safe queries/mutations
+- **React Router v7** for navigation
+- **Responsive design** with modern CSS
+- **Professional UI/UX** with gradient backgrounds and card layouts
+- **Real-time error handling** and loading states
+
+### 🏗️ **Microservices Architecture**
+- **Apollo Federation Gateway** for unified GraphQL API
+- **Users Service** - Authentication and user management
+- **Products Service** - Product catalog (extensible)
+- **Orders Service** - Order management (extensible)
+- **Fully federated** GraphQL schema
+
+### 🛠️ **User Management (CRUD)**
+- View user profile dashboard
+- List all users in a table
+- Create new users via registration
+- Update user details
+- Delete users with confirmation
+- Role-based access control ready
+
+### 🔄 **Automatic Token Refresh**
+- Detects expired tokens automatically
+- Refreshes tokens in the background
+- Retries failed requests seamlessly
+- Handles concurrent requests during refresh
+- Zero interruption to user experience
+
+### 📱 **Responsive Design**
+- Mobile-friendly interface
+- Touch-optimized controls
+- Adaptive layouts for all screen sizes
+- Modern color scheme with CSS variables
+
+## 🏛️ Architecture
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│                   Federation Gateway (Port 4000)            │
-│                    Apollo Supergraph Gateway                │
-│  - Combines multiple GraphQL subgraphs                      │
-│  - Provides unified GraphQL API                             │
-│  - Proxies REST API requests                                │
-└─────────────────────────────────────────────────────────────┘
-                            │
-        ┌───────────────────┼───────────────────┐
-        │                   │                   │
-        ▼                   ▼                   ▼
-┌──────────────┐    ┌──────────────┐    ┌──────────────┐
-│Users Service │    │Products Svc  │    │Orders Service│
-│  (Port 3001) │    │  (Port 3002) │    │  (Port 3003) │
-│              │    │              │    │              │
-│GraphQL       │    │GraphQL       │    │REST API      │
-│Subgraph      │    │Subgraph      │    │              │
-└──────────────┘    └──────────────┘    └──────────────┘
+│                     React Frontend (Vite)                    │
+│  - Apollo Client with Error Link for Auto Token Refresh     │
+│  - TypeScript + GraphQL Code Generator                      │
+│  - Protected Routes + Auth Context                          │
+└────────────────────────┬────────────────────────────────────┘
+                         │
+                         ↓ GraphQL over HTTP
+┌─────────────────────────────────────────────────────────────┐
+│              Apollo Federation Gateway (Port 4000)           │
+│  - Unified GraphQL Schema                                   │
+│  - JWT Authentication Plugin                                │
+│  - CORS Configuration                                       │
+└────────────┬──────────────────────┬─────────────────────────┘
+             │                      │
+             ↓                      ↓
+┌────────────────────┐  ┌────────────────────┐  ┌─────────────┐
+│   Users Service    │  │ Products Service   │  │   Orders    │
+│   (Port 3001)      │  │   (Port 3002)      │  │  Service    │
+│ - Auth & Users     │  │ - Product Catalog  │  │ (Port 3003) │
+│ - JWT Generation   │  │ - Federated Schema │  │ - REST API  │
+│ - Token Refresh    │  │ - GraphQL          │  │             │
+└────────────────────┘  └────────────────────┘  └─────────────┘
 ```
 
-## Services
+## 🚀 Quick Start
 
-### 1. Federation Gateway (Port 4000)
-- **Type**: Apollo Federation Supergraph Gateway
-- **Technology**: NestJS + Apollo Gateway
-- **Purpose**: 
-  - Aggregates GraphQL subgraphs (users-service & products-service)
-  - Provides unified GraphQL endpoint
-  - Proxies REST API requests to orders-service
-  
-### 2. Users Service (Port 3001)
-- **Type**: GraphQL Subgraph
-- **Technology**: NestJS + Apollo Federation
-- **Features**:
-  - User management (CRUD operations)
-  - Federated entity with `@key(fields: "id")`
-  - Queries: `users`, `user(id)`, `userByEmail(email)`
-  - Mutations: `createUser(name, email, role)`
+### Prerequisites
+- Node.js 18+ and npm
+- Git
 
-### 3. Products Service (Port 3002)
-- **Type**: GraphQL Subgraph
-- **Technology**: NestJS + Apollo Federation
-- **Features**:
-  - Product catalog management
-  - Federated entity with `@key(fields: "id")`
-  - Queries: `products`, `product(id)`, `productsByCategory(category)`
-  - Mutations: `createProduct(...)`, `updateProductStock(id, quantity)`
+### Installation & Setup
 
-### 4. Orders Service (Port 3003)
-- **Type**: REST API
-- **Technology**: NestJS REST Controller
-- **Features**:
-  - Order management
-  - RESTful endpoints
-  - Endpoints: 
-    - `GET /orders` - Get all orders (optional ?userId filter)
-    - `GET /orders/:id` - Get order by ID
-    - `POST /orders` - Create new order
-    - `PUT /orders/:id` - Update order
-    - `DELETE /orders/:id` - Delete order
+```bash
+# Clone the repository
+git clone <repository-url>
+cd <project-folder>
 
-## Project Structure
+# Install dependencies for all services
+cd users-service && npm install
+cd ../products-service && npm install
+cd ../orders-service && npm install
+cd ../federation-gateway && npm install
+cd ../frontend && npm install
+
+# Configure environment variables
+# Update federation-gateway/.env with localhost URLs
+
+# Start all services (in separate terminals)
+cd users-service && npm start       # Port 3001
+cd products-service && npm start    # Port 3002
+cd orders-service && npm start      # Port 3003
+cd federation-gateway && npm start  # Port 4000
+cd frontend && npm run dev          # Port 5173
+```
+
+### Access the Application
+
+- **Frontend**: http://localhost:5173
+- **GraphQL Playground**: http://localhost:4000/graphql
+- **Default Credentials**: 
+  - Email: `test@example.com`
+  - Password: `password123`
+
+## 📂 Project Structure
 
 ```
 .
-├── federation-gateway/          # Apollo Federation Gateway (Supergraph)
+├── frontend/                    # React + TypeScript frontend
 │   ├── src/
-│   │   ├── app.module.ts       # Main module with Federation config
-│   │   ├── main.ts
-│   │   ├── auth/               # JWT authentication
-│   │   ├── config/             # Configuration service
-│   │   ├── health/             # Health check endpoint
-│   │   └── proxy/              # REST API proxy controllers
-│   ├── Dockerfile
-│   └── package.json
+│   │   ├── pages/              # Login, Register, Dashboard, Users, EditUser
+│   │   ├── components/         # ProtectedRoute
+│   │   ├── context/            # AuthContext for state management
+│   │   ├── lib/                # Apollo Client, Token Refresh logic
+│   │   ├── graphql/            # Queries and Mutations
+│   │   └── generated/          # Auto-generated TypeScript types
+│   ├── codegen.ts              # GraphQL Code Generator config
+│   └── vite.config.ts          # Vite configuration with proxy
 │
-├── users-service/              # Users GraphQL Subgraph
-│   ├── src/
-│   │   ├── users/
-│   │   │   ├── user.entity.ts       # User entity with @Directive('@key(fields: "id")')
-│   │   │   ├── users.resolver.ts    # GraphQL resolver with @ResolveReference
-│   │   │   └── users.service.ts
-│   │   └── app.module.ts           # ApolloFederationDriver config
-│   ├── Dockerfile
-│   └── package.json
+├── federation-gateway/          # Apollo Federation Gateway
+│   └── src/
+│       ├── auth/               # JWT authentication plugin
+│       ├── config/             # Configuration service
+│       └── proxy/              # REST API proxies
 │
-├── products-service/           # Products GraphQL Subgraph
-│   ├── src/
-│   │   ├── products/
-│   │   │   ├── product.entity.ts    # Product entity with @Directive('@key(fields: "id")')
-│   │   │   ├── products.resolver.ts # GraphQL resolver with @ResolveReference
-│   │   │   └── products.service.ts
-│   │   └── app.module.ts           # ApolloFederationDriver config
-│   ├── Dockerfile
-│   └── package.json
+├── users-service/              # User & Auth microservice
+│   └── src/
+│       ├── auth/               # Login, Register, Refresh Token
+│       └── users/              # User CRUD operations
 │
-├── orders-service/             # Orders REST API
-│   ├── src/
-│   │   ├── orders/
-│   │   │   ├── order.entity.ts
-│   │   │   ├── orders.controller.ts # REST controller
-│   │   │   ├── orders.service.ts
-│   │   │   └── dto/                # DTOs for validation
-│   │   └── app.module.ts
-│   ├── Dockerfile
-│   └── package.json
+├── products-service/           # Products microservice
+│   └── src/
+│       └── products/           # Product management
 │
-├── docker-compose.yml          # Orchestrates all services
-└── README.md
+└── orders-service/             # Orders microservice
+    └── src/
+        └── orders/             # Order management
 ```
 
-## Getting Started
+## 🎯 Key Technologies
 
-### Prerequisites
-- Docker and Docker Compose
-- Node.js 20+ (for local development)
-- npm or yarn
+### Frontend
+- **React 19.2** - Modern UI framework
+- **TypeScript 5.9** - Type safety
+- **Apollo Client 3.8** - GraphQL client with caching
+- **React Router 7.13** - Client-side routing
+- **GraphQL Code Generator** - Auto-generated types and hooks
+- **Vite 7.2** - Lightning-fast build tool
 
-### Quick Start with Docker
+### Backend
+- **NestJS 10** - Progressive Node.js framework
+- **Apollo Server** - GraphQL server
+- **Apollo Federation** - Microservices composition
+- **TypeScript** - Type-safe backend
+- **JWT (jsonwebtoken)** - Authentication with RS256
+- **TypeORM** - Database ORM (configurable)
 
-1. **Clone the repository**
-   ```bash
-   git clone <repository-url>
-   cd <repository-directory>
-   ```
+## 🔐 Security Features
 
-2. **Start all services**
-   ```bash
-   docker-compose up --build
-   ```
+- ✅ **RS256 JWT tokens** with public/private key pairs
+- ✅ **Short-lived access tokens** (15 minutes) minimize exposure
+- ✅ **Long-lived refresh tokens** (7-30 days) for convenience
+- ✅ **Automatic token rotation** on refresh
+- ✅ **Token revocation** ready (refresh token stored per user)
+- ✅ **CORS configured** for cross-origin requests
+- ✅ **Protected GraphQL operations** with auth guards
+- ✅ **Error handling** prevents token leakage
 
-3. **Access the services**
-   - Federation Gateway GraphQL Playground: http://localhost:4000/graphql
-   - Users Service GraphQL Playground: http://localhost:3001/graphql
-   - Products Service GraphQL Playground: http://localhost:3002/graphql
-   - Orders Service REST API: http://localhost:3003/orders
-   - Health checks: 
-     - http://localhost:4000/health
-     - http://localhost:3001/health
-     - http://localhost:3002/health
-     - http://localhost:3003/health
+## 📖 API Documentation
 
-### Local Development (Without Docker)
+### Authentication Mutations
 
-1. **Install dependencies for each service**
-   ```bash
-   # Federation Gateway
-   cd federation-gateway && npm install && cd ..
-   
-   # Users Service
-   cd users-service && npm install && cd ..
-   
-   # Products Service
-   cd products-service && npm install && cd ..
-   
-   # Orders Service
-   cd orders-service && npm install && cd ..
-   ```
-
-2. **Start each service in separate terminals**
-   ```bash
-   # Terminal 1 - Users Service
-   cd users-service && npm run start:dev
-   
-   # Terminal 2 - Products Service
-   cd products-service && npm run start:dev
-   
-   # Terminal 3 - Orders Service
-   cd orders-service && npm run start:dev
-   
-   # Terminal 4 - Federation Gateway
-   cd federation-gateway && npm run start:dev
-   ```
-
-## Testing the Federation
-
-### GraphQL Queries (via Federation Gateway at http://localhost:4000/graphql)
-
-#### Query Users
 ```graphql
-query {
-  users {
-    id
-    name
-    email
-    role
-    createdAt
-  }
-}
-```
-
-#### Query Products
-```graphql
-query {
-  products {
-    id
-    name
-    description
-    price
-    stock
-    category
-  }
-}
-```
-
-#### Query Specific User
-```graphql
-query {
-  user(id: "1") {
-    id
-    name
-    email
-    role
-  }
-}
-```
-
-#### Create User Mutation
-```graphql
-mutation {
-  createUser(
-    name: "Alice Johnson"
-    email: "alice@example.com"
+# Register a new user
+mutation Register {
+  register(input: { 
+    name: "John Doe"
+    email: "john@example.com"
+    password: "securepass123"
     role: "user"
-  ) {
-    id
-    name
-    email
-    role
+  }) {
+    accessToken
+    refreshToken
+    user { id name email role }
+  }
+}
+
+# Login
+mutation Login {
+  login(input: { 
+    email: "john@example.com"
+    password: "securepass123"
+    rememberMe: true
+  }) {
+    accessToken
+    refreshToken
+    user { id name email role }
+  }
+}
+
+# Refresh access token
+mutation RefreshToken {
+  refreshToken(input: { 
+    refreshToken: "your_refresh_token"
+  }) {
+    accessToken
+    refreshToken
+    user { id name email role }
   }
 }
 ```
 
-#### Create Product Mutation
+### User Queries & Mutations
+
 ```graphql
-mutation {
-  createProduct(
-    name: "Mechanical Keyboard"
-    description: "RGB mechanical gaming keyboard"
-    price: 149.99
-    stock: 75
-    category: "Accessories"
-  ) {
-    id
-    name
-    price
-    stock
+# Get current user
+query GetMe {
+  me {
+    id name email role createdAt
   }
+}
+
+# Get all users
+query GetUsers {
+  users {
+    id name email role createdAt
+  }
+}
+
+# Update user
+mutation UpdateUser {
+  updateUser(id: "1", input: { 
+    name: "Jane Doe"
+    email: "jane@example.com"
+  }) {
+    id name email role
+  }
+}
+
+# Delete user
+mutation DeleteUser {
+  deleteUser(id: "1")
 }
 ```
 
-### REST API Calls (Orders Service via Gateway)
+## 🎨 UI Features
 
-#### Get All Orders
-```bash
-curl http://localhost:4000/api/orders
-```
+- **Gradient authentication pages** with modern design
+- **Card-based layouts** for content organization
+- **Responsive tables** for user management
+- **Form validation** with helpful error messages
+- **Loading states** for async operations
+- **Success/error notifications** with color coding
+- **Mobile-responsive** design with breakpoints
+- **Hover effects** and smooth transitions
 
-#### Get Orders by User
-```bash
-curl http://localhost:4000/api/orders?userId=1
-```
+## 🧪 Testing
 
-#### Get Order by ID
 ```bash
-curl http://localhost:4000/api/orders/1
-```
-
-#### Create Order
-```bash
-curl -X POST http://localhost:4000/api/orders \
+# Test authentication flow
+curl -X POST http://localhost:4000/graphql \
   -H "Content-Type: application/json" \
-  -d '{
-    "userId": "1",
-    "items": [
-      {"productId": "1", "quantity": 1, "price": 1299.99}
-    ],
-    "shippingAddress": "123 Main St, New York, NY 10001"
-  }'
-```
+  -d '{"query":"mutation { login(input: { email: \"test@example.com\", password: \"password123\" }) { accessToken refreshToken user { id name } } }"}'
 
-#### Update Order Status
-```bash
-curl -X PUT http://localhost:4000/api/orders/1 \
+# Test token refresh
+curl -X POST http://localhost:4000/graphql \
   -H "Content-Type: application/json" \
-  -d '{
-    "status": "DELIVERED"
-  }'
+  -d '{"query":"mutation { refreshToken(input: { refreshToken: \"YOUR_TOKEN\" }) { accessToken user { id } } }"}'
 ```
 
-#### Delete Order
-```bash
-curl -X DELETE http://localhost:4000/api/orders/1
-```
+## 🚧 Roadmap
 
-## Direct Service Access
+### Planned Features
+- [ ] Email verification for registration
+- [ ] Password reset functionality
+- [ ] Two-factor authentication (2FA)
+- [ ] User avatar upload
+- [ ] Admin dashboard with analytics
+- [ ] Activity logs and audit trail
+- [ ] Rate limiting for API endpoints
+- [ ] WebSocket subscriptions for real-time updates
+- [ ] Unit and E2E tests
+- [ ] Docker Compose for easy deployment
+- [ ] CI/CD pipeline configuration
 
-You can also access services directly (bypassing the gateway):
+## 🤝 Contributing
 
-- **Users Service**: http://localhost:3001/graphql
-- **Products Service**: http://localhost:3002/graphql
-- **Orders Service**: http://localhost:3003/orders
-
-## Key Features
-
-### Apollo Federation
-- **Subgraph Composition**: Multiple GraphQL services compose into a single unified graph
-- **Entity References**: Entities can be referenced across subgraphs using `@key` directive
-- **Type Extension**: Types can be extended across services
-- **Automatic Schema Composition**: Gateway automatically composes the supergraph schema
-
-### Service Independence
-- Each service has its own codebase, Dockerfile, and can be deployed independently
-- Services communicate through well-defined GraphQL or REST interfaces
-- Easy to scale individual services based on load
-
-### Development Features
-- Hot reload enabled for all services during development
-- Health check endpoints for monitoring
-- CORS enabled for frontend integration
-- Validation pipes for data integrity
-
-## Environment Variables
-
-### Federation Gateway
-```env
-PORT=4000
-NODE_ENV=development
-USERS_SERVICE_URL=http://users-service:3001/graphql
-PRODUCTS_SERVICE_URL=http://products-service:3002/graphql
-ORDERS_SERVICE_URL=http://orders-service:3003
-APOLLO_PLAYGROUND=true
-APOLLO_INTROSPECTION=true
-```
-
-### Individual Services
-```env
-PORT=<service-port>
-NODE_ENV=development
-```
-
-## Production Deployment
-
-To run in production mode:
-
-```bash
-docker-compose -f docker-compose.yml up --build -d
-```
-
-Or build production images:
-
-```bash
-# Build production images
-docker build -t federation-gateway:prod --target production ./federation-gateway
-docker build -t users-service:prod --target production ./users-service
-docker build -t products-service:prod --target production ./products-service
-docker build -t orders-service:prod --target production ./orders-service
-```
-
-## Troubleshooting
-
-### Services not connecting
-- Ensure all services are running: `docker-compose ps`
-- Check logs: `docker-compose logs -f <service-name>`
-- Verify network connectivity: `docker network inspect <network-name>`
-
-### Gateway can't find subgraphs
-- Verify service URLs in environment variables
-- Ensure subgraph services are healthy
-- Check that services are on the same Docker network
-
-### Port conflicts
-- Change exposed ports in docker-compose.yml if ports are already in use
-
-## Contributing
+Contributions are welcome! Please feel free to submit a Pull Request.
 
 1. Fork the repository
-2. Create a feature branch
-3. Commit your changes
-4. Push to the branch
-5. Create a Pull Request
+2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
 
-## License
+## 📝 License
 
-MIT License
+This project is licensed under the MIT License - see the LICENSE file for details.
+
+## 🙏 Acknowledgments
+
+- **Apollo GraphQL** - For the excellent GraphQL implementation
+- **NestJS** - For the amazing Node.js framework
+- **React Team** - For the best UI library
+- **TypeScript** - For making JavaScript better
+
+## 📧 Contact
+
+For questions or feedback, please open an issue on GitHub.
+
+---
+
+**⭐ Star this repository if you find it helpful!**
+
+Built with ❤️ using React, TypeScript, NestJS, and GraphQL
