@@ -1,0 +1,146 @@
+╔══════════════════════════════════════════════════════════════════════╗
+║                    PROJECT STRUCTURE OVERVIEW                        ║
+╚══════════════════════════════════════════════════════════════════════╝
+
+📁 Root Directory
+├── 📄 docker-compose.yml          # Orchestrates all 4 services
+├── 📄 .gitignore                  # Git exclusions
+├── 📄 README.md                   # Complete documentation
+├── 📄 QUICK_START.md              # Quick reference guide
+├── 📄 SETUP_SUMMARY.md            # Setup overview
+├── 📄 EXAMPLES.md                 # API examples & queries
+└── 🧪 tmp_rovodev_*.sh            # Test scripts
+
+📁 federation-gateway/              ⚡ Apollo Federation Supergraph
+├── 📄 Dockerfile                  # Multi-stage Docker build
+├── 📄 package.json                # Dependencies (@apollo/gateway)
+├── 📄 tsconfig.json               # TypeScript config
+├── 📄 nest-cli.json               # NestJS CLI config
+├── 📄 .dockerignore               # Docker build exclusions
+├── 📄 .env                        # Environment variables
+└── 📁 src/
+    ├── 📄 main.ts                 # Application entry point
+    ├── 📄 app.module.ts           # Main module with Federation config
+    ├── 📁 config/                 # Configuration service
+    ├── 📁 auth/                   # JWT authentication
+    ├── 📁 health/                 # Health check endpoint
+    └── 📁 proxy/                  # REST API proxy controllers
+        ├── auth-proxy.controller.ts
+        ├── media-proxy.controller.ts
+        ├── orders-proxy.controller.ts  ⭐ NEW
+        ├── proxy.service.ts
+        └── proxy.module.ts
+
+📁 users-service/                   🔷 GraphQL Subgraph (Port 3001)
+├── 📄 Dockerfile                  # Service-specific Docker build
+├── 📄 package.json                # Dependencies (@apollo/subgraph)
+├── 📄 tsconfig.json               # TypeScript config
+├── 📄 nest-cli.json               # NestJS CLI config
+├── 📄 .dockerignore               # Docker build exclusions
+├── 📄 .env                        # Environment variables
+└── 📁 src/
+    ├── 📄 main.ts                 # Service entry point
+    ├── 📄 app.module.ts           # ApolloFederationDriver config
+    ├── 📁 users/
+    │   ├── user.entity.ts         # @Directive('@key(fields: "id")')
+    │   ├── users.resolver.ts      # @ResolveReference
+    │   ├── users.service.ts       # Business logic
+    │   └── users.module.ts
+    └── 📁 health/
+        ├── health.controller.ts
+        └── health.module.ts
+
+📁 products-service/                🔶 GraphQL Subgraph (Port 3002)
+├── 📄 Dockerfile                  # Service-specific Docker build
+├── 📄 package.json                # Dependencies (@apollo/subgraph)
+├── 📄 tsconfig.json               # TypeScript config
+├── 📄 nest-cli.json               # NestJS CLI config
+├── 📄 .dockerignore               # Docker build exclusions
+├── 📄 .env                        # Environment variables
+└── 📁 src/
+    ├── 📄 main.ts                 # Service entry point
+    ├── 📄 app.module.ts           # ApolloFederationDriver config
+    ├── 📁 products/
+    │   ├── product.entity.ts      # @Directive('@key(fields: "id")')
+    │   ├── products.resolver.ts   # @ResolveReference
+    │   ├── products.service.ts    # Business logic
+    │   └── products.module.ts
+    └── 📁 health/
+        ├── health.controller.ts
+        └── health.module.ts
+
+📁 orders-service/                  🟢 REST API Service (Port 3003)
+├── 📄 Dockerfile                  # Service-specific Docker build
+├── 📄 package.json                # NestJS dependencies
+├── 📄 tsconfig.json               # TypeScript config
+├── 📄 nest-cli.json               # NestJS CLI config
+├── 📄 .dockerignore               # Docker build exclusions
+├── 📄 .env                        # Environment variables
+└── 📁 src/
+    ├── 📄 main.ts                 # Service entry point
+    ├── 📄 app.module.ts           # Main module config
+    ├── 📁 orders/
+    │   ├── order.entity.ts        # Order entity & enums
+    │   ├── orders.controller.ts   # REST controller (GET/POST/PUT/DELETE)
+    │   ├── orders.service.ts      # Business logic
+    │   ├── orders.module.ts
+    │   └── 📁 dto/
+    │       ├── create-order.dto.ts
+    │       └── update-order.dto.ts
+    └── 📁 health/
+        ├── health.controller.ts
+        └── health.module.ts
+
+╔══════════════════════════════════════════════════════════════════════╗
+║                        KEY CHARACTERISTICS                           ║
+╚══════════════════════════════════════════════════════════════════════╝
+
+✅ Each service has:
+   • Separate folder with complete codebase
+   • Independent Dockerfile (multi-stage build)
+   • Own package.json with dependencies
+   • TypeScript configuration
+   • Health check endpoint
+   • Development & production builds
+
+✅ Federation Gateway:
+   • Uses @apollo/gateway
+   • IntrospectAndCompose for subgraph discovery
+   • Proxies REST API requests
+   • Unified GraphQL endpoint at :4000
+
+✅ GraphQL Subgraphs (Users & Products):
+   • Use @apollo/subgraph
+   • ApolloFederationDriver
+   • @key directive for entity resolution
+   • @ResolveReference for cross-service queries
+
+✅ REST API (Orders):
+   • NestJS REST controllers
+   • DTO validation with class-validator
+   • Full CRUD operations
+   • Accessible via Gateway proxy
+
+╔══════════════════════════════════════════════════════════════════════╗
+║                          PORT MAPPING                                ║
+╚══════════════════════════════════════════════════════════════════════╝
+
+Service              | Port  | Type              | Access
+---------------------|-------|-------------------|---------------------------
+Federation Gateway   | 4000  | GraphQL Gateway   | http://localhost:4000/graphql
+Users Service        | 3001  | GraphQL Subgraph  | http://localhost:3001/graphql
+Products Service     | 3002  | GraphQL Subgraph  | http://localhost:3002/graphql
+Orders Service       | 3003  | REST API          | http://localhost:3003/orders
+
+╔══════════════════════════════════════════════════════════════════════╗
+║                     TECHNOLOGY STACK                                 ║
+╚══════════════════════════════════════════════════════════════════════╝
+
+• Framework:          NestJS (TypeScript)
+• GraphQL:            Apollo Federation v2
+• Federation:         @apollo/gateway + @apollo/subgraph
+• Container:          Docker + Docker Compose
+• Runtime:            Node.js 20 Alpine
+• Validation:         class-validator + class-transformer
+• HTTP Client:        @nestjs/axios
+

@@ -1,0 +1,646 @@
+{
+	"info": {
+		"_postman_id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+		"name": "Federation Gateway API",
+		"description": "Complete API collection for testing the Federation Gateway and all services (Users, Products, Orders) via the gateway",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Health Checks",
+			"item": [
+				{
+					"name": "Gateway Health Check",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{gateway_url}}/health",
+							"host": ["{{gateway_url}}"],
+							"path": ["health"]
+						},
+						"description": "Check overall gateway health and all connected services"
+					},
+					"response": []
+				},
+				{
+					"name": "Services Health Check",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{gateway_url}}/health/services",
+							"host": ["{{gateway_url}}"],
+							"path": ["health", "services"]
+						},
+						"description": "Get detailed health status of all federated services"
+					},
+					"response": []
+				}
+			],
+			"description": "Health check endpoints for gateway and services"
+		},
+		{
+			"name": "Authentication",
+			"item": [
+				{
+					"name": "Register User",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200 || pm.response.code === 201) {",
+									"    var jsonData = pm.response.json();",
+									"    if (jsonData.data && jsonData.data.register && jsonData.data.register.token) {",
+									"        pm.environment.set(\"jwt_token\", jsonData.data.register.token);",
+									"        console.log(\"JWT Token saved:\", jsonData.data.register.token);",
+									"    }",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "graphql",
+							"graphql": {
+								"query": "mutation Register($input: RegisterInput!) {\n  register(input: $input) {\n    token\n    user {\n      id\n      name\n      email\n      role\n      createdAt\n    }\n  }\n}",
+								"variables": "{\n  \"input\": {\n    \"name\": \"John Doe\",\n    \"email\": \"john.doe@example.com\",\n    \"password\": \"SecurePassword123!\",\n    \"role\": \"user\"\n  }\n}"
+							}
+						},
+						"url": {
+							"raw": "{{gateway_url}}/graphql",
+							"host": ["{{gateway_url}}"],
+							"path": ["graphql"]
+						},
+						"description": "Register a new user account via GraphQL. Token is automatically saved to environment."
+					},
+					"response": []
+				},
+				{
+					"name": "Login User",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    var jsonData = pm.response.json();",
+									"    if (jsonData.data && jsonData.data.login && jsonData.data.login.token) {",
+									"        pm.environment.set(\"jwt_token\", jsonData.data.login.token);",
+									"        console.log(\"JWT Token saved:\", jsonData.data.login.token);",
+									"    }",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "graphql",
+							"graphql": {
+								"query": "mutation Login($input: LoginInput!) {\n  login(input: $input) {\n    token\n    user {\n      id\n      name\n      email\n      role\n      createdAt\n    }\n  }\n}",
+								"variables": "{\n  \"input\": {\n    \"email\": \"john.doe@example.com\",\n    \"password\": \"SecurePassword123!\"\n  }\n}"
+							}
+						},
+						"url": {
+							"raw": "{{gateway_url}}/graphql",
+							"host": ["{{gateway_url}}"],
+							"path": ["graphql"]
+						},
+						"description": "Login with existing credentials. Token is automatically saved to environment."
+					},
+					"response": []
+				}
+			],
+			"description": "User registration and authentication endpoints"
+		},
+		{
+			"name": "Users Service (GraphQL)",
+			"item": [
+				{
+					"name": "Get Current User Profile (Me)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}",
+								"description": "JWT token from login/register"
+							}
+						],
+						"body": {
+							"mode": "graphql",
+							"graphql": {
+								"query": "query Me {\n  me {\n    id\n    name\n    email\n    role\n    createdAt\n    updatedAt\n  }\n}",
+								"variables": ""
+							}
+						},
+						"url": {
+							"raw": "{{gateway_url}}/graphql",
+							"host": ["{{gateway_url}}"],
+							"path": ["graphql"]
+						},
+						"description": "Get the profile of the currently authenticated user"
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Users",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "graphql",
+							"graphql": {
+								"query": "query GetUsers {\n  users {\n    id\n    name\n    email\n    role\n    createdAt\n  }\n}",
+								"variables": ""
+							}
+						},
+						"url": {
+							"raw": "{{gateway_url}}/graphql",
+							"host": ["{{gateway_url}}"],
+							"path": ["graphql"]
+						},
+						"description": "Get list of all users (public endpoint)"
+					},
+					"response": []
+				},
+				{
+					"name": "Get User by ID",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "graphql",
+							"graphql": {
+								"query": "query GetUser($id: String!) {\n  user(id: $id) {\n    id\n    name\n    email\n    role\n    createdAt\n    updatedAt\n  }\n}",
+								"variables": "{\n  \"id\": \"1\"\n}"
+							}
+						},
+						"url": {
+							"raw": "{{gateway_url}}/graphql",
+							"host": ["{{gateway_url}}"],
+							"path": ["graphql"]
+						},
+						"description": "Get a specific user by ID"
+					},
+					"response": []
+				},
+				{
+					"name": "Get User by Email",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "graphql",
+							"graphql": {
+								"query": "query GetUserByEmail($email: String!) {\n  userByEmail(email: $email) {\n    id\n    name\n    email\n    role\n    createdAt\n  }\n}",
+								"variables": "{\n  \"email\": \"john.doe@example.com\"\n}"
+							}
+						},
+						"url": {
+							"raw": "{{gateway_url}}/graphql",
+							"host": ["{{gateway_url}}"],
+							"path": ["graphql"]
+						},
+						"description": "Find a user by their email address"
+					},
+					"response": []
+				},
+				{
+					"name": "Create User",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "graphql",
+							"graphql": {
+								"query": "mutation CreateUser($name: String!, $email: String!, $role: String) {\n  createUser(name: $name, email: $email, role: $role) {\n    id\n    name\n    email\n    role\n    createdAt\n  }\n}",
+								"variables": "{\n  \"name\": \"Jane Smith\",\n  \"email\": \"jane.smith@example.com\",\n  \"role\": \"user\"\n}"
+							}
+						},
+						"url": {
+							"raw": "{{gateway_url}}/graphql",
+							"host": ["{{gateway_url}}"],
+							"path": ["graphql"]
+						},
+						"description": "Create a new user (admin operation)"
+					},
+					"response": []
+				}
+			],
+			"description": "User management via GraphQL through the gateway"
+		},
+		{
+			"name": "Products Service (GraphQL)",
+			"item": [
+				{
+					"name": "Get All Products",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "graphql",
+							"graphql": {
+								"query": "query GetProducts {\n  products {\n    id\n    name\n    description\n    price\n    stock\n    category\n    createdAt\n    updatedAt\n  }\n}",
+								"variables": ""
+							}
+						},
+						"url": {
+							"raw": "{{gateway_url}}/graphql",
+							"host": ["{{gateway_url}}"],
+							"path": ["graphql"]
+						},
+						"description": "Get list of all products"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Product by ID",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "graphql",
+							"graphql": {
+								"query": "query GetProduct($id: String!) {\n  product(id: $id) {\n    id\n    name\n    description\n    price\n    stock\n    category\n    createdAt\n    updatedAt\n  }\n}",
+								"variables": "{\n  \"id\": \"1\"\n}"
+							}
+						},
+						"url": {
+							"raw": "{{gateway_url}}/graphql",
+							"host": ["{{gateway_url}}"],
+							"path": ["graphql"]
+						},
+						"description": "Get a specific product by ID"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Products by Category",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "graphql",
+							"graphql": {
+								"query": "query GetProductsByCategory($category: String!) {\n  productsByCategory(category: $category) {\n    id\n    name\n    description\n    price\n    stock\n    category\n    createdAt\n  }\n}",
+								"variables": "{\n  \"category\": \"Electronics\"\n}"
+							}
+						},
+						"url": {
+							"raw": "{{gateway_url}}/graphql",
+							"host": ["{{gateway_url}}"],
+							"path": ["graphql"]
+						},
+						"description": "Get all products in a specific category"
+					},
+					"response": []
+				},
+				{
+					"name": "Create Product",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}",
+								"description": "JWT token required for mutations"
+							}
+						],
+						"body": {
+							"mode": "graphql",
+							"graphql": {
+								"query": "mutation CreateProduct($name: String!, $description: String!, $price: Float!, $stock: Int!, $category: String!) {\n  createProduct(\n    name: $name\n    description: $description\n    price: $price\n    stock: $stock\n    category: $category\n  ) {\n    id\n    name\n    description\n    price\n    stock\n    category\n    createdAt\n  }\n}",
+								"variables": "{\n  \"name\": \"Laptop\",\n  \"description\": \"High-performance laptop for professionals\",\n  \"price\": 1299.99,\n  \"stock\": 50,\n  \"category\": \"Electronics\"\n}"
+							}
+						},
+						"url": {
+							"raw": "{{gateway_url}}/graphql",
+							"host": ["{{gateway_url}}"],
+							"path": ["graphql"]
+						},
+						"description": "Create a new product (requires authentication)"
+					},
+					"response": []
+				},
+				{
+					"name": "Update Product Stock",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}",
+								"description": "JWT token required for mutations"
+							}
+						],
+						"body": {
+							"mode": "graphql",
+							"graphql": {
+								"query": "mutation UpdateProductStock($id: String!, $quantity: Int!) {\n  updateProductStock(id: $id, quantity: $quantity) {\n    id\n    name\n    stock\n    updatedAt\n  }\n}",
+								"variables": "{\n  \"id\": \"1\",\n  \"quantity\": -5\n}"
+							}
+						},
+						"url": {
+							"raw": "{{gateway_url}}/graphql",
+							"host": ["{{gateway_url}}"],
+							"path": ["graphql"]
+						},
+						"description": "Update product stock quantity (use negative values to decrease stock)"
+					},
+					"response": []
+				}
+			],
+			"description": "Product management via GraphQL through the gateway"
+		},
+		{
+			"name": "Orders Service (REST)",
+			"item": [
+				{
+					"name": "Get All Orders",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}",
+								"description": "JWT token required"
+							}
+						],
+						"url": {
+							"raw": "{{gateway_url}}/api/orders",
+							"host": ["{{gateway_url}}"],
+							"path": ["api", "orders"]
+						},
+						"description": "Get all orders (requires authentication)"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Orders by User ID",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}",
+								"description": "JWT token required"
+							}
+						],
+						"url": {
+							"raw": "{{gateway_url}}/api/orders?userId=1",
+							"host": ["{{gateway_url}}"],
+							"path": ["api", "orders"],
+							"query": [
+								{
+									"key": "userId",
+									"value": "1"
+								}
+							]
+						},
+						"description": "Get all orders for a specific user"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Order by ID",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}",
+								"description": "JWT token required"
+							}
+						],
+						"url": {
+							"raw": "{{gateway_url}}/api/orders/1",
+							"host": ["{{gateway_url}}"],
+							"path": ["api", "orders", "1"]
+						},
+						"description": "Get a specific order by ID"
+					},
+					"response": []
+				},
+				{
+					"name": "Create Order",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}",
+								"description": "JWT token required"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"userId\": \"1\",\n  \"items\": [\n    {\n      \"productId\": \"1\",\n      \"quantity\": 2,\n      \"price\": 1299.99\n    },\n    {\n      \"productId\": \"2\",\n      \"quantity\": 1,\n      \"price\": 599.99\n    }\n  ],\n  \"shippingAddress\": \"123 Main St, New York, NY 10001\"\n}"
+						},
+						"url": {
+							"raw": "{{gateway_url}}/api/orders",
+							"host": ["{{gateway_url}}"],
+							"path": ["api", "orders"]
+						},
+						"description": "Create a new order"
+					},
+					"response": []
+				},
+				{
+					"name": "Update Order",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}",
+								"description": "JWT token required"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"status\": \"shipped\",\n  \"shippingAddress\": \"456 Oak Ave, Los Angeles, CA 90001\"\n}"
+						},
+						"url": {
+							"raw": "{{gateway_url}}/api/orders/1",
+							"host": ["{{gateway_url}}"],
+							"path": ["api", "orders", "1"]
+						},
+						"description": "Update an existing order (status can be: pending, processing, shipped, delivered, cancelled)"
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Order",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}",
+								"description": "JWT token required"
+							}
+						],
+						"url": {
+							"raw": "{{gateway_url}}/api/orders/1",
+							"host": ["{{gateway_url}}"],
+							"path": ["api", "orders", "1"]
+						},
+						"description": "Delete an order by ID"
+					},
+					"response": []
+				}
+			],
+			"description": "Order management via REST API proxied through the gateway"
+		},
+		{
+			"name": "Combined Queries (Federation)",
+			"item": [
+				{
+					"name": "Get Products with Extended Info",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "graphql",
+							"graphql": {
+								"query": "query GetProductsWithInfo {\n  products {\n    id\n    name\n    description\n    price\n    stock\n    category\n  }\n  users {\n    id\n    name\n    email\n  }\n}",
+								"variables": ""
+							}
+						},
+						"url": {
+							"raw": "{{gateway_url}}/graphql",
+							"host": ["{{gateway_url}}"],
+							"path": ["graphql"]
+						},
+						"description": "Example of a federated query combining data from multiple services"
+					},
+					"response": []
+				},
+				{
+					"name": "Get User with Profile",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}",
+								"description": "JWT token from login"
+							}
+						],
+						"body": {
+							"mode": "graphql",
+							"graphql": {
+								"query": "query GetUserProfile {\n  me {\n    id\n    name\n    email\n    role\n    createdAt\n    updatedAt\n  }\n  products {\n    id\n    name\n    price\n    category\n  }\n}",
+								"variables": ""
+							}
+						},
+						"url": {
+							"raw": "{{gateway_url}}/graphql",
+							"host": ["{{gateway_url}}"],
+							"path": ["graphql"]
+						},
+						"description": "Get current user profile along with available products"
+					},
+					"response": []
+				}
+			],
+			"description": "Examples of federated queries combining multiple services"
+		}
+	],
+	"variable": [
+		{
+			"key": "gateway_url",
+			"value": "http://localhost:4000",
+			"type": "string"
+		},
+		{
+			"key": "jwt_token",
+			"value": "",
+			"type": "string"
+		}
+	]
+}
