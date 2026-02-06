@@ -14,7 +14,6 @@ logs/
 npm-debug.log*
 
 # Environment files
-.env
 .env.local
 .env.*.local
 
@@ -35,5 +34,3 @@ tmp_*
 # Coverage
 coverage/
 .nyc_output/
-
-keys/
