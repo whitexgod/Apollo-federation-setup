@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { GraphQLModule } from '@nestjs/graphql';
 import { ApolloFederationDriver, ApolloFederationDriverConfig } from '@nestjs/apollo';
+import { ApolloServerPluginLandingPageLocalDefault } from '@apollo/server/plugin/landingPage/default';
 import { ProductsModule } from './products/products.module';
 import { HealthModule } from './health/health.module';
 
@@ -11,8 +12,11 @@ import { HealthModule } from './health/health.module';
       autoSchemaFile: {
         federation: 2,
       },
-      playground: true,
-      introspection: true,
+      plugins: [
+        ApolloServerPluginLandingPageLocalDefault(),
+      ],
+      playground: false, // Disable old playground in favor of Apollo Sandbox
+      introspection: true, // Enable introspection for GraphQL Playground/Sandbox
       context: ({ req }) => ({ req }),
     }),
     ProductsModule,
