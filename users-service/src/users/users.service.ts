@@ -54,4 +54,26 @@ export class UsersService {
     this.users.push(newUser);
     return newUser;
   }
+
+  update(id: string, name?: string, email?: string, role?: string): User | undefined {
+    const user = this.findById(id);
+    if (!user) {
+      return undefined;
+    }
+    
+    if (name !== undefined) user.name = name;
+    if (email !== undefined) user.email = email;
+    if (role !== undefined) user.role = role;
+    
+    return user;
+  }
+
+  delete(id: string): boolean {
+    const index = this.users.findIndex((user) => user.id === id);
+    if (index === -1) {
+      return false;
+    }
+    this.users.splice(index, 1);
+    return true;
+  }
 }

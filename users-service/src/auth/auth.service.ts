@@ -13,6 +13,7 @@ export interface JwtPayload {
 
 export interface LoginResponse {
   accessToken: string;
+  refreshToken: string;
   user: User;
 }
 
@@ -20,7 +21,8 @@ export interface LoginResponse {
 export class AuthService {
   private readonly privateKey: string;
   private readonly publicKey: string;
-  private readonly JWT_EXPIRES_IN: string | number = process.env.JWT_EXPIRES_IN || '24h';
+  private readonly JWT_EXPIRES_IN: string | number = process.env.JWT_EXPIRES_IN || '15m';
+  private readonly REFRESH_TOKEN_EXPIRES_IN: string | number = process.env.REFRESH_TOKEN_EXPIRES_IN || '7d';
 
   constructor(private readonly usersService: UsersService) {
     // Load RSA keys from keys directory
@@ -50,11 +52,16 @@ export class AuthService {
       throw new UnauthorizedException('Invalid credentials');
     }
 
-    // Generate JWT token
-    const token = this.generateToken(user);
+    // Generate JWT tokens
+    const accessToken = this.generateToken(user);
+    const refreshToken = this.generateRefreshToken(user);
+
+    // Store refresh token in user (in production, store hashed in DB)
+    user.refreshToken = refreshToken;
 
     return {
-      accessToken: token,
+      accessToken,
+      refreshToken,
       user,
     };
   }
@@ -84,11 +91,16 @@ export class AuthService {
     // In production, hash the password with bcrypt before storing
     const user = this.usersService.create(name, email, role, password);
 
-    // Generate token
-    const token = this.generateToken(user);
+    // Generate tokens
+    const accessToken = this.generateToken(user);
+    const refreshToken = this.generateRefreshToken(user);
+
+    // Store refresh token in user (in production, store hashed in DB)
+    user.refreshToken = refreshToken;
 
     return {
-      accessToken: token,
+      accessToken,
+      refreshToken,
       user,
     };
   }
@@ -105,6 +117,55 @@ export class AuthService {
       algorithm: 'RS256',
       expiresIn: this.JWT_EXPIRES_IN,
     } as any);
+  }
+
+  generateRefreshToken(user: User): string {
+    const payload: JwtPayload = {
+      userId: user.id,
+      email: user.email,
+      role: user.role,
+    };
+
+    // Sign with RS256 algorithm using private key with longer expiry
+    return jwt.sign(payload, this.privateKey, {
+      algorithm: 'RS256',
+      expiresIn: this.REFRESH_TOKEN_EXPIRES_IN,
+    } as any);
+  }
+
+  async refreshAccessToken(refreshToken: string): Promise<LoginResponse> {
+    try {
+      // Verify refresh token
+      const payload = jwt.verify(refreshToken, this.publicKey, {
+        algorithms: ['RS256'],
+      }) as JwtPayload;
+
+      // Find user
+      const user = this.usersService.findById(payload.userId);
+      if (!user) {
+        throw new UnauthorizedException('User not found');
+      }
+
+      // Verify refresh token matches stored token
+      if (user.refreshToken !== refreshToken) {
+        throw new UnauthorizedException('Invalid refresh token');
+      }
+
+      // Generate new tokens
+      const newAccessToken = this.generateToken(user);
+      const newRefreshToken = this.generateRefreshToken(user);
+
+      // Update stored refresh token
+      user.refreshToken = newRefreshToken;
+
+      return {
+        accessToken: newAccessToken,
+        refreshToken: newRefreshToken,
+        user,
+      };
+    } catch (error) {
+      throw new UnauthorizedException('Invalid or expired refresh token');
+    }
   }
 
   verifyToken(token: string): JwtPayload {

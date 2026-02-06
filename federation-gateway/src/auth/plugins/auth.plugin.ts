@@ -24,12 +24,13 @@ export class AuthPlugin implements ApolloServerPlugin {
           return; // Allow introspection queries for GraphQL Playground
         }
 
-        // Check if this is a public mutation (login or register)
+        // Check if this is a public mutation (login, register, or refreshToken)
         const isPublicMutation =
-          query.includes('mutation') && (query.includes('login') || query.includes('register'));
+          query.includes('mutation') && 
+          (query.includes('login') || query.includes('register') || query.includes('refreshToken'));
 
         if (isPublicMutation) {
-          return; // Allow login and register mutations without authentication
+          return; // Allow login, register, and refreshToken mutations without authentication
         }
 
         // Validate authentication for all other queries

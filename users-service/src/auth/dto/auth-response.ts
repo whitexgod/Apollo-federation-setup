@@ -9,6 +9,9 @@ export class AuthResponse {
   @Field({ description: 'Alias for accessToken' })
   token?: string;
 
+  @Field()
+  refreshToken: string;
+
   @Field(() => User)
   user: User;
 }

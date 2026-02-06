@@ -2,6 +2,7 @@ import { Resolver, Query, Mutation, Args, ResolveReference } from '@nestjs/graph
 import { User } from './user.entity';
 import { UsersService } from './users.service';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
+import { UpdateUserInput } from './dto/update-user.input';
 
 @Resolver(() => User)
 export class UsersResolver {
@@ -41,6 +42,21 @@ export class UsersResolver {
     @Args('role', { nullable: true }) role?: string,
   ) {
     return this.usersService.create(name, email, role);
+  }
+
+  // Gateway handles authentication
+  @Mutation(() => User, { nullable: true })
+  updateUser(
+    @Args('id') id: string,
+    @Args('input') input: UpdateUserInput,
+  ) {
+    return this.usersService.update(id, input.name, input.email, input.role);
+  }
+
+  // Gateway handles authentication
+  @Mutation(() => Boolean)
+  deleteUser(@Args('id') id: string) {
+    return this.usersService.delete(id);
   }
 
   @ResolveReference()

@@ -20,4 +20,7 @@ export class User {
 
   // Password is not exposed in GraphQL schema
   password?: string;
+
+  // Refresh token is not exposed in GraphQL schema
+  refreshToken?: string;
 }
