@@ -10,6 +10,7 @@ export const Login: React.FC = () => {
     email: '',
     password: '',
   });
+  const [rememberMe, setRememberMe] = useState(false);
   const [error, setError] = useState('');
 
   const [loginMutation, { loading }] = useLoginMutation();
@@ -21,11 +22,21 @@ export const Login: React.FC = () => {
     try {
       const { data } = await loginMutation({
         variables: {
-          input: formData,
+          input: {
+            ...formData,
+            rememberMe: rememberMe,
+          },
         },
       });
 
       if (data?.login) {
+        // Store remember me preference
+        if (rememberMe) {
+          localStorage.setItem('rememberMe', 'true');
+        } else {
+          localStorage.removeItem('rememberMe');
+        }
+        
         login(
           data.login.accessToken, 
           data.login.refreshToken,
@@ -63,6 +74,18 @@ export const Login: React.FC = () => {
               onChange={(e) => setFormData({ ...formData, password: e.target.value })}
               required
             />
+          </div>
+          <div className="form-group" style={{ flexDirection: 'row', alignItems: 'center' }}>
+            <input
+              type="checkbox"
+              id="rememberMe"
+              checked={rememberMe}
+              onChange={(e) => setRememberMe(e.target.checked)}
+              style={{ width: 'auto', marginRight: '0.5rem' }}
+            />
+            <label htmlFor="rememberMe" style={{ marginBottom: 0, cursor: 'pointer' }}>
+              Remember me for 30 days
+            </label>
           </div>
           <button type="submit" disabled={loading} className="btn-primary">
             {loading ? 'Logging in...' : 'Login'}

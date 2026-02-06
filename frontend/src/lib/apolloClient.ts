@@ -46,10 +46,14 @@ const errorLink = onError(({ graphQLErrors, operation, forward }) => {
 
           if (!refreshToken) {
             // No refresh token, logout user
+            console.warn('No refresh token found, redirecting to login');
             localStorage.removeItem('token');
             localStorage.removeItem('refreshToken');
             localStorage.removeItem('user');
-            window.location.href = '/login';
+            // Use setTimeout to avoid interrupting other operations
+            setTimeout(() => {
+              window.location.href = '/login';
+            }, 100);
             return;
           }
 
@@ -58,26 +62,33 @@ const errorLink = onError(({ graphQLErrors, operation, forward }) => {
               .then((tokens) => {
                 if (!tokens) {
                   // Refresh failed, logout user
+                  console.error('Token refresh failed, logging out');
                   localStorage.removeItem('token');
                   localStorage.removeItem('refreshToken');
                   localStorage.removeItem('user');
-                  window.location.href = '/login';
+                  setTimeout(() => {
+                    window.location.href = '/login';
+                  }, 100);
                   return;
                 }
 
                 // Update tokens in localStorage
+                console.log('Tokens refreshed successfully');
                 localStorage.setItem('token', tokens.accessToken);
                 localStorage.setItem('refreshToken', tokens.refreshToken);
 
                 resolvePendingRequests();
                 return tokens.accessToken;
               })
-              .catch(() => {
+              .catch((err) => {
+                console.error('Token refresh error:', err);
                 pendingRequests = [];
                 localStorage.removeItem('token');
                 localStorage.removeItem('refreshToken');
                 localStorage.removeItem('user');
-                window.location.href = '/login';
+                setTimeout(() => {
+                  window.location.href = '/login';
+                }, 100);
                 return;
               })
               .finally(() => {

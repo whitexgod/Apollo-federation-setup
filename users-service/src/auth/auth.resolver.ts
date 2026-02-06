@@ -13,7 +13,7 @@ export class AuthResolver {
   @Public()
   @Mutation(() => AuthResponse)
   async login(@Args('input') input: LoginInput): Promise<AuthResponse> {
-    return this.authService.login(input.email, input.password);
+    return this.authService.login(input.email, input.password, input.rememberMe);
   }
 
   @Public()

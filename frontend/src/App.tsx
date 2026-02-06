@@ -4,7 +4,6 @@ import { client } from './lib/apolloClient';
 import { AuthProvider } from './context/AuthContext';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import { Login } from './pages/Login';
-import { LoginDebug } from './pages/LoginDebug';
 import { Register } from './pages/Register';
 import { Dashboard } from './pages/Dashboard';
 import { Users } from './pages/Users';
@@ -20,7 +19,6 @@ function App() {
             <Routes>
               <Route path="/" element={<Navigate to="/login" replace />} />
               <Route path="/login" element={<Login />} />
-              <Route path="/login-debug" element={<LoginDebug />} />
               <Route path="/register" element={<Register />} />
               <Route
                 path="/dashboard"

@@ -6,7 +6,10 @@ import { useAuth } from '../context/AuthContext';
 export const Dashboard: React.FC = () => {
   const navigate = useNavigate();
   const { logout } = useAuth();
-  const { data, loading, error } = useGetMeQuery();
+  const { data, loading, error } = useGetMeQuery({
+    // Don't show error, let error link handle token refresh
+    errorPolicy: 'all',
+  });
 
   const handleLogout = () => {
     logout();
@@ -14,7 +17,13 @@ export const Dashboard: React.FC = () => {
   };
 
   if (loading) return <div className="loading">Loading...</div>;
-  if (error) return <div className="error-message">Error: {error.message}</div>;
+  
+  // If there's an error and no data, show the error but don't redirect
+  if (error && !data?.me) {
+    console.error('Dashboard error:', error);
+    // The error link will handle token refresh automatically
+    return <div className="loading">Refreshing session...</div>;
+  }
 
   return (
     <div className="dashboard-container">

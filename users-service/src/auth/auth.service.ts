@@ -17,12 +17,19 @@ export interface LoginResponse {
   user: User;
 }
 
+export interface RegisterResponse {
+  accessToken: string;
+  refreshToken: string;
+  user: User;
+}
+
 @Injectable()
 export class AuthService {
   private readonly privateKey: string;
   private readonly publicKey: string;
   private readonly JWT_EXPIRES_IN: string | number = process.env.JWT_EXPIRES_IN || '15m';
   private readonly REFRESH_TOKEN_EXPIRES_IN: string | number = process.env.REFRESH_TOKEN_EXPIRES_IN || '7d';
+  private readonly REFRESH_TOKEN_REMEMBER_ME_EXPIRES_IN: string | number = process.env.REFRESH_TOKEN_REMEMBER_ME_EXPIRES_IN || '30d';
 
   constructor(private readonly usersService: UsersService) {
     // Load RSA keys from keys directory
@@ -36,7 +43,7 @@ export class AuthService {
     }
   }
 
-  async login(email: string, password: string): Promise<LoginResponse> {
+  async login(email: string, password: string, rememberMe: boolean = false): Promise<LoginResponse> {
     // Find user by email
     const user = this.usersService.findByEmail(email);
 
@@ -54,7 +61,7 @@ export class AuthService {
 
     // Generate JWT tokens
     const accessToken = this.generateToken(user);
-    const refreshToken = this.generateRefreshToken(user);
+    const refreshToken = this.generateRefreshToken(user, rememberMe);
 
     // Store refresh token in user (in production, store hashed in DB)
     user.refreshToken = refreshToken;
@@ -119,7 +126,7 @@ export class AuthService {
     } as any);
   }
 
-  generateRefreshToken(user: User): string {
+  generateRefreshToken(user: User, rememberMe: boolean = false): string {
     const payload: JwtPayload = {
       userId: user.id,
       email: user.email,
@@ -127,9 +134,12 @@ export class AuthService {
     };
 
     // Sign with RS256 algorithm using private key with longer expiry
+    // Use 30 days if rememberMe is true, otherwise 7 days
+    const expiresIn = rememberMe ? this.REFRESH_TOKEN_REMEMBER_ME_EXPIRES_IN : this.REFRESH_TOKEN_EXPIRES_IN;
+    
     return jwt.sign(payload, this.privateKey, {
       algorithm: 'RS256',
-      expiresIn: this.REFRESH_TOKEN_EXPIRES_IN,
+      expiresIn: expiresIn,
     } as any);
   }
 
