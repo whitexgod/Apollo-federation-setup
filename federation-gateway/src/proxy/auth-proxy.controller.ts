@@ -6,22 +6,27 @@ import {
   HttpStatus,
   UseInterceptors,
   UploadedFile,
+  UseGuards,
 } from '@nestjs/common';
 import { Request, Response } from 'express';
 import { ProxyService } from './proxy.service';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { Public } from '../auth/decorators/public.decorator';
+import { Protected } from '../auth/decorators/protected.decorator';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 
 @Controller('api/auth')
-@Public() // All auth endpoints are public
+@Public() // All auth endpoints are public by default
 export class AuthProxyController {
   constructor(private readonly proxyService: ProxyService) {}
 
   /**
    * File upload endpoints (profile pictures)
-   * Public route - auth service will handle authentication internally if needed
+   * JWT Protected route - requires valid authentication token
    */
   @All('profile-picture/*')
+  @Protected() // Override controller-level @Public() to enforce JWT authentication
+  @UseGuards(JwtAuthGuard)
   @UseInterceptors(FileInterceptor('file'))
   async handleProfilePictureRequest(
     @Req() req: Request,
@@ -98,24 +103,24 @@ export class AuthProxyController {
    * All other auth endpoints
    * No auth guard - auth service will handle authentication
    */
-  @All('*')
-  async handleProtectedRequest(@Req() req: Request, @Res() res: Response) {
-    try {
-      const path = req.path.replace('/api/auth', '');
-      const result = await this.proxyService.forwardToAuthService(
-        path,
-        req.method,
-        req.headers,
-        req.body,
-        req.query,
-      );
+  // @All('*')
+  // async handleProtectedRequest(@Req() req: Request, @Res() res: Response) {
+  //   try {
+  //     const path = req.path.replace('/api/auth', '');
+  //     const result = await this.proxyService.forwardToAuthService(
+  //       path,
+  //       req.method,
+  //       req.headers,
+  //       req.body,
+  //       req.query,
+  //     );
 
-      res.status(result.status).json(result.data);
-    } catch (error) {
-      res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
-        message: 'Proxy request failed',
-        error: error.message,
-      });
-    }
-  }
+  //     res.status(result.status).json(result.data);
+  //   } catch (error) {
+  //     res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
+  //       message: 'Proxy request failed',
+  //       error: error.message,
+  //     });
+  //   }
+  // }
 }

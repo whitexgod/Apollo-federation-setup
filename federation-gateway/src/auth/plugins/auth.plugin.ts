@@ -26,7 +26,7 @@ export class AuthPlugin implements ApolloServerPlugin {
 
         // Check if this is a public mutation (login, register, or refreshToken)
         const isPublicMutation =
-          query.includes('mutation') && 
+          query.includes('mutation') &&
           (query.includes('login') || query.includes('register') || query.includes('refreshToken'));
 
         if (isPublicMutation) {
